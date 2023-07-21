@@ -10,6 +10,7 @@ namespace WebApiAutores.Utilidades
 		{
 			//Mappeo de AutorCreacionDTO a Autor
 			CreateMap<AutorCreacionDTO, Autor>();
+			CreateMap<Autor, AutorDTO>();
 		}
 	}
 }
