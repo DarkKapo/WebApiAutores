@@ -21,6 +21,8 @@ namespace WebApiAutores
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			services.AddEndpointsApiExplorer();
 			services.AddSwaggerGen();
+			//Configuración auto mapper
+			services.AddAutoMapper(typeof(Startup));
 		}
 
 		public void Configure (IApplicationBuilder app, IWebHostEnvironment env)

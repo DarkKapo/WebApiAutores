@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using WebApiAutores.Controllers.Entidades;
+using WebApiAutores.DTO;
 
 namespace WebApiAutores.Controllers
 {
@@ -12,10 +14,13 @@ namespace WebApiAutores.Controllers
 	{
 		//Traer ApplicationDbContext para hacer conexión a la BD
 		private readonly ApplicationDbContext context;
-
-		public AutoresController(ApplicationDbContext context) 
+		private readonly IMapper mapper;
+		
+		//Importar mapper
+		public AutoresController(ApplicationDbContext context, IMapper mapper) 
 		{
 			this.context = context;
+			this.mapper = mapper;
 		}
 
 		[HttpGet] // ruta = api/autores
@@ -35,11 +40,14 @@ namespace WebApiAutores.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Post(Autor autor)
+		public async Task<ActionResult> Post(AutorCreacionDTO autorCreacionDTO)
 		{
-			var existeAutor = await context.Autores.AnyAsync(x => x.Nombre == autor.Nombre);
+			var existeAutor = await context.Autores.AnyAsync(x => x.Nombre == autorCreacionDTO.Nombre);
 
-			if (existeAutor) return BadRequest($"Ya existe el autor {autor.Nombre}");
+			if (existeAutor) return BadRequest($"Ya existe el autor {autorCreacionDTO.Nombre}");
+			
+			//Uso de automapper
+			var autor = mapper.Map<Autor>(autorCreacionDTO);
 
 			context.Add(autor);
 			await context.SaveChangesAsync();
