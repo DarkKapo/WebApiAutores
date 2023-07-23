@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using WebApiAutores.Controllers.Entidades;
 using WebApiAutores.DTO;
 
@@ -31,16 +30,14 @@ namespace WebApiAutores.Controllers
 			return autoresDTO;
 		}
 
-		[HttpGet("{id:int}")]
+		[HttpGet("{id:int}", Name = "ObtenerAutor")]
 		public async Task<ActionResult<AutorDTOConLibros>> Get(int id)
 		{
 			var autor = await context.Autores.Include(autorDB => autorDB.AutoresLibros).ThenInclude(autorLibroDB => autorLibroDB.Libro).FirstOrDefaultAsync(x => x.Id == id);
 
 			if(autor == null) return NotFound();
 
-			var autorDTO = mapper.Map<AutorDTOConLibros>(autor);
-
-			return autorDTO;
+			return mapper.Map<AutorDTOConLibros>(autor); ;
 		}
 
 		[HttpGet("{nombre}")]
@@ -63,7 +60,9 @@ namespace WebApiAutores.Controllers
 
 			context.Add(autor);
 			await context.SaveChangesAsync();
-			return Ok();
+
+			var autorDTO = mapper.Map<AutorDTO>(autor);
+			return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
 		}
 
 		[HttpPut("{id:int}")] // ruta = api/autores/id

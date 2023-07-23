@@ -19,7 +19,7 @@ namespace WebApiAutores.Controllers
 			this.mapper = mapper;
 		}
 		//Trae un libro en específico
-		[HttpGet("{id:int}")]
+		[HttpGet("{id:int}", Name = "ObtenerLibro")]
 		public async Task<ActionResult<LibroDTOConAutores>> Get(int id)
 		{
 			var libro = await context.Libros.Include(libroDB => libroDB.AutoresLibros).ThenInclude(autorLibroDB => autorLibroDB.Autor).FirstOrDefaultAsync(x => x.Id == id);
@@ -38,14 +38,16 @@ namespace WebApiAutores.Controllers
 			if (libroCreacionDTO.AutoresIds.Count != autoresIds.Count) return BadRequest("No existe uno de los autores");
 
 			var libro = mapper.Map<Libro>(libroCreacionDTO);
-			//Cuando se guarde un libro, se insertan en el mismo orden que se env'ian
+			//Cuando se guarde un libro, se insertan en el mismo orden que se envían
 			if(libro.AutoresLibros != null)
 				for (int i = 0; i < libro.AutoresLibros.Count; i++)
 					libro.AutoresLibros[i].Orden = i;
 
 			context.Add(libro);
 			await context.SaveChangesAsync();
-			return Ok();
+
+			var libroDTO = mapper.Map<LibroDTO>(libro);
+			return CreatedAtRoute("ObtenerLibro", new { id = libro.Id }, libroDTO);
 		}
 	}
 }
