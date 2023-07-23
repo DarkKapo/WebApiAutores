@@ -27,7 +27,8 @@ namespace WebApiAutores.Controllers
 		public async Task<List<AutorDTO>> Get() 
 		{	//Retorna una lista de autores
 			var autores = await context.Autores.ToListAsync();
-			return mapper.Map<List<AutorDTO>>(autores);
+			var autoresDTO = mapper.Map<List<AutorDTO>>(autores);
+			return autoresDTO;
 		}
 
 		[HttpGet("{id:int}")]
@@ -37,7 +38,9 @@ namespace WebApiAutores.Controllers
 
 			if(autor == null) return NotFound();
 
-			return mapper.Map<AutorDTO>(autor);
+			var autorDTO = mapper.Map<AutorDTO>(autor);
+
+			return autorDTO;
 		}
 
 		[HttpGet("{nombre}")]
