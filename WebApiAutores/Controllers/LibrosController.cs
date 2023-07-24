@@ -38,16 +38,37 @@ namespace WebApiAutores.Controllers
 			if (libroCreacionDTO.AutoresIds.Count != autoresIds.Count) return BadRequest("No existe uno de los autores");
 
 			var libro = mapper.Map<Libro>(libroCreacionDTO);
-			//Cuando se guarde un libro, se insertan en el mismo orden que se envían
-			if(libro.AutoresLibros != null)
-				for (int i = 0; i < libro.AutoresLibros.Count; i++)
-					libro.AutoresLibros[i].Orden = i;
+			AsignarOrdenAutores(libro);
 
 			context.Add(libro);
 			await context.SaveChangesAsync();
 
 			var libroDTO = mapper.Map<LibroDTO>(libro);
 			return CreatedAtRoute("ObtenerLibro", new { id = libro.Id }, libroDTO);
+		}
+
+		[HttpPut]
+		public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
+		{
+			//Trae el libro (para ver si existe) y AutoresLibros (para actualizarlo)
+			var librodDB = await context.Libros.Include(x => x.AutoresLibros).FirstOrDefaultAsync(x => x.Id == id);
+
+			if (librodDB == null) return NotFound();
+
+			//Mapear de liboCreacionDTO a libroDB para que libroDB tenga la misma estructa y así poder realizar el PUT
+			librodDB = mapper.Map(libroCreacionDTO, librodDB);
+			AsignarOrdenAutores(librodDB);
+
+			await context.SaveChangesAsync();
+			return NoContent();
+		}
+
+		private void AsignarOrdenAutores(Libro libro)
+		{
+			//Cuando se guarde un libro, se insertan en el mismo orden que se envían
+			if (libro.AutoresLibros != null)
+				for (int i = 0; i < libro.AutoresLibros.Count; i++)
+					libro.AutoresLibros[i].Orden = i;
 		}
 	}
 }
